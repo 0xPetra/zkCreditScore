@@ -1,15 +1,18 @@
 import { useState, useEffect } from 'react'
-import { Button, Image, Text, VStack, useBreakpointValue } from "@chakra-ui/react";
+import { Button, Image, Text, VStack, useBreakpointValue, Card, Grid, CardBody } from "@chakra-ui/react";
 import { decode } from '@/lib/wld'
 import ContractAbi from '@/abi/Contract.abi'
 import { ConnectKitButton } from 'connectkit'
 import { IDKitWidget, ISuccessResult } from '@worldcoin/idkit'
 import { useAccount, useContractWrite, usePrepareContractWrite } from 'wagmi'
+import { clientInput } from '../lib/consts'
 
 export default function Main() {
 	const { address } = useAccount()
+    const [loadingAxiom, setLoadingAxiom] = useState(false)
 	const [isClient, setIsClient] = useState(false);
 	const [proof, setProof] = useState<ISuccessResult | null>(null)
+	const [axiomProof, setAxiomProof] = useState<any | null>(null)
 
 	const buttonSize = useBreakpointValue({ base: "sm", md: "md", lg: "lg" });
 
@@ -46,6 +49,26 @@ export default function Main() {
         setIsClient(true);
     }, []);
 
+    // Handlers
+    const generateAxiomProof = async () => {
+        try {
+            setLoadingAxiom(true);
+            const response: any = await fetch(`/api/axiom`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(address)
+            });
+            console.log("🚀 ~ file: main.tsx:53 ~ generateAxiomProof ~ response:", response)
+            setAxiomProof(response.json())
+        } catch (error) {
+            console.error(error)
+        }
+        setLoadingAxiom(false);
+
+    }
+
     return (
 		    <VStack
       spacing={4}
@@ -61,16 +84,17 @@ export default function Main() {
       <Text fontSize={useBreakpointValue({ base: "xl", md: "2xl", lg: "3xl" })} fontWeight="bold">
         zkCreditScore
       </Text>
-  
-  
-  
-      <Text fontSize={useBreakpointValue({ base: "md", md: "lg", lg: "xl" })}>
-        Connect World ID
-      </Text>
-      {isClient && address ? (
+
+      <Grid templateColumns={{ sm: "repeat(1, 1fr)", md: "repeat(2, 1fr)" }} gap={6} p={6}>
+    <Card>
+        <CardBody>
+            <Text fontSize={useBreakpointValue({ base: "md", md: "lg", lg: "xl" })}>
+                World ID
+            </Text>
+            {isClient && address ? (
                 proof ? (
                     <Text color="green">
-                        World ID Connected
+                        Connected
                     </Text>
                     
                 ) : (
@@ -81,17 +105,46 @@ export default function Main() {
                         app_id={process.env.NEXT_PUBLIC_APP_ID!}
                     >
                         {({ open }) => 
-                            <Button size={buttonSize} colorScheme="blue" outline="true" onClick={open}>
-                                Verify 
+                            <Button size={buttonSize} variant='outline' colorScheme="red" onClick={open}>
+                                Verify World ID 
                             </Button>
                         }
                     </IDKitWidget>
                 )
             ) : (
-                <Button size={buttonSize} colorScheme="blue" outline="true">
+                <Button size={buttonSize} variant='outline' colorScheme="red">
                     <ConnectKitButton />
                 </Button>
             )}
+        </CardBody>
+      </Card>
+    <Card>
+        <CardBody>
+            <Text fontSize={useBreakpointValue({ base: "md", md: "lg", lg: "xl" })}>
+                On chain Assets (Axiom)
+            </Text> 
+
+            {axiomProof !== null ? 
+            <Text color="green">
+                Assets: NaN
+                {/* Assets: {axiomProof} */}
+            </Text>
+            :
+            <Button size={buttonSize} variant='outline' colorScheme="red" onClick={() => generateAxiomProof()} isLoading={loadingAxiom}>
+                Generate Proof
+            </Button>}
+        </CardBody>
+      </Card>
+  </Grid>
+
+        {isClient && proof && axiomProof &&
+        <Button size={buttonSize} variant='outline' colorScheme="red" onClick={() => generateAxiomProof()} isLoading={loadingAxiom}>
+            Generate zk Credit Score
+        </Button>
+        }
+  
+  
+
     </VStack>
 
     );

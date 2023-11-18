@@ -1,5 +1,5 @@
-import { MyAxiomCircuit } from "../circuit";
-import { MyInputs, myCircuitFn } from "../circuit/circuit";
+import { MyAxiomCircuit } from "../../../circuit";
+import { MyInputs, myCircuitFn } from "../../../circuit/circuit";
 import { ZeroHash, ethers, keccak256 } from "ethers";
 import {
   Axiom,

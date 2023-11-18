@@ -11,7 +11,7 @@ const config = {
 const theme = extendTheme({ config });
 
     return (
-		<ChakraProvider theme={theme}>
+		<ChakraProvider theme={theme} >
         <main>
           <Main />
         </main>
