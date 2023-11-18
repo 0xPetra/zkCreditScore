@@ -1,5 +1,5 @@
-import { defaultAbiCoder as abi } from 'ethers/lib/utils'
+import ethers from 'ethers'
 
 export const decode = <T>(type: string, encodedString: string): T => {
-	return abi.decode([type], encodedString)[0]
+	return ethers.AbiCoder.defaultAbiCoder().decode([type], encodedString)[0]
 }
