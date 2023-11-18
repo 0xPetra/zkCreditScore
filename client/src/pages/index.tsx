@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { BigNumber } from 'ethers'
 import { decode } from '@/lib/wld'
 import ContractAbi from '@/abi/Contract.abi'
@@ -8,6 +8,7 @@ import { useAccount, useContractWrite, usePrepareContractWrite } from 'wagmi'
 
 export default function Home() {
 	const { address } = useAccount()
+	const [isClient, setIsClient] = useState(false);
 	const [proof, setProof] = useState<ISuccessResult | null>(null)
 
 	const { config } = usePrepareContractWrite({
@@ -39,24 +40,29 @@ export default function Home() {
 
 	const { write } = useContractWrite(config)
 
-	return (
-		<main>
-			{address ? (
-				proof ? (
-					<button onClick={write}>submit tx</button>
-				) : (
-					<IDKitWidget
-						signal={address}
-						action="your-action"
-						onSuccess={setProof}
-						app_id={process.env.NEXT_PUBLIC_APP_ID!}
-					>
-						{({ open }) => <button onClick={open}>verify with world id</button>}
-					</IDKitWidget>
-				)
-			) : (
-				<ConnectKitButton />
-			)}
-		</main>
-	)
-}
+	useEffect(() => {
+        setIsClient(true);
+    }, []);
+
+    return (
+        <main>
+            {isClient && address ? (
+                proof ? (
+                    <button onClick={write}>submit tx</button>
+                ) : (
+                    <IDKitWidget
+                        signal={address}
+                        action="your-action"
+                        onSuccess={setProof}
+                        app_id={process.env.NEXT_PUBLIC_APP_ID!}
+                    >
+                        {({ open }) => <button onClick={open}>verify with world id</button>}
+                    </IDKitWidget>
+                )
+            ) : (
+                <ConnectKitButton />
+            )}
+
+        </main>
+    );
+};
