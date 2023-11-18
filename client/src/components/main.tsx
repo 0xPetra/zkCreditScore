@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Box, Button, Image, Text, VStack, useBreakpointValue } from "@chakra-ui/react";
+import { Button, Image, Text, VStack, useBreakpointValue } from "@chakra-ui/react";
 import { decode } from '@/lib/wld'
 import ContractAbi from '@/abi/Contract.abi'
 import { ConnectKitButton } from 'connectkit'
@@ -59,15 +59,20 @@ export default function Main() {
         alt="Image Description"
       />
       <Text fontSize={useBreakpointValue({ base: "xl", md: "2xl", lg: "3xl" })} fontWeight="bold">
-        Title Here
+        zkCreditScore
       </Text>
+  
+  
+  
       <Text fontSize={useBreakpointValue({ base: "md", md: "lg", lg: "xl" })}>
-        Subtitle Here
+        Connect World ID
       </Text>
-
       {isClient && address ? (
                 proof ? (
-                    <button onClick={write}>submit tx</button>
+                    <Text color="green">
+                        World ID Connected
+                    </Text>
+                    
                 ) : (
                     <IDKitWidget
                         signal={address}
@@ -75,11 +80,15 @@ export default function Main() {
                         onSuccess={setProof}
                         app_id={process.env.NEXT_PUBLIC_APP_ID!}
                     >
-                        {({ open }) => <button onClick={open}>verify with world id</button>}
+                        {({ open }) => 
+                            <Button size={buttonSize} colorScheme="blue" outline="true" onClick={open}>
+                                Verify 
+                            </Button>
+                        }
                     </IDKitWidget>
                 )
             ) : (
-                <Button size={buttonSize} colorScheme="blue">
+                <Button size={buttonSize} colorScheme="blue" outline="true">
                     <ConnectKitButton />
                 </Button>
             )}
