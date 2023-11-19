@@ -89,7 +89,7 @@ export default function Main() {
             // console.log("🚀 ~ file: main.tsx:88 ~ generateCreditScore ~ getProofResponse:", getProofResponse)
             // console.log(JSON.stringify(getProofResponse), null, 2)
             setTimeout(() => {
-                setCreditScore(8.7)
+                setCreditScore(Math.floor(Math.random() * 10))
             }, 200);
         } catch (error) {
             console.error(error)
@@ -101,6 +101,7 @@ export default function Main() {
         setPrintingMagicMoney(true);
         // await write()
         setTimeout(() => {
+            setPrintingMagicMoney(false);
             setLoanSuccess(true)
         }, 200);
     }
@@ -125,7 +126,7 @@ export default function Main() {
         Defi&apos;s Original Goal
       </Text>
       <Text fontSize={useBreakpointValue({ base: "lg", md: "md", lg: "md" })} fontWeight="bold">
-        Minimized collateral lending protocol
+        Real credits for real people
       </Text>
 
       <Grid templateColumns={{ sm: "repeat(1, 1fr)", md: "repeat(3, 1fr)" }} gap={6} p={6}>
@@ -241,10 +242,13 @@ export default function Main() {
             </>
             :
             <>
-                    {creditScore && 
+        {creditScore && 
             <Box>
             <Text fontSize="xl">
                 Get Loan
+            </Text> 
+            <Text fontSize="md" color="green">
+                Credit Score: {creditScore}
             </Text> 
             <Button size={buttonSize} variant='outline' colorScheme="blue" onClick={() => getLoan()} isLoading={loadingEZKL}>
                 Send it!
