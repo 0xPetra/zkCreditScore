@@ -15,6 +15,7 @@ export default function Main() {
     const [loadingAxiom, setLoadingAxiom] = useState<boolean>(false)
 	const [loadingEZKL, setLoadingEZKL] = useState<boolean>(false)
 	const [printingMagicMoney, setPrintingMagicMoney] = useState<boolean>(false)
+	const [loanSuccess, setLoanSuccess] = useState<boolean>(false)
 
 	const [isClient, setIsClient] = useState(false);
 	const [proof, setProof] = useState<ISuccessResult | null>(null)
@@ -80,22 +81,28 @@ export default function Main() {
 
     const generateCreditScore = async () => {
         try {
-            setLoadingEZKL(true)
-            const id: string = 'c4b049c3-9770-45cf-b8ec-1bee0efc8347' // uuid
-            // you can provide an optional url if you're using a custom EZKL Hub instance
-            const url: string = 'https://hub.ezkl.xyz'
-            const getProofResponse = await hub.getProof({ id, url })
-            console.log("🚀 ~ file: main.tsx:88 ~ generateCreditScore ~ getProofResponse:", getProofResponse)
-            console.log(JSON.stringify(getProofResponse), null, 2)
-            setCreditScore(8.7)
+            // setLoadingEZKL(true)
+            // const id: string = 'c4b049c3-9770-45cf-b8ec-1bee0efc8347' // uuid
+            // // you can provide an optional url if you're using a custom EZKL Hub instance
+            // const url: string = 'https://hub.ezkl.xyz'
+            // const getProofResponse = await hub.getProof({ id, url })
+            // console.log("🚀 ~ file: main.tsx:88 ~ generateCreditScore ~ getProofResponse:", getProofResponse)
+            // console.log(JSON.stringify(getProofResponse), null, 2)
+            setTimeout(() => {
+                setCreditScore(8.7)
+            }, 200);
         } catch (error) {
             console.error(error)
         }
         setLoadingEZKL(false)
     }
 
-    const getLoan = () => {
+    const getLoan = async () => {
         setPrintingMagicMoney(true);
+        // await write()
+        setTimeout(() => {
+            setLoanSuccess(true)
+        }, 200);
     }
 
     return (
@@ -193,27 +200,27 @@ export default function Main() {
             </Text>
         </CardBody>
       </Card>
+      <Card>
+        <CardBody>
+            <Text fontSize={useBreakpointValue({ base: "md", md: "lg", lg: "xl" })}>
+              Repaying Attestations
+            </Text>
+            <Text color="gray">
+                (coming soon)
+            </Text>
+        </CardBody>
+      </Card>
 
     </Grid>
-        {true &&
-        // {/* FIXME: */}
-        // {isClient && proof && axiomProof && !creditScore &&
+        {/* {true && */}
+        {/* // FIXME: */}
+        {isClient && proof && axiomResponse && !creditScore &&
             <Box>
             <Text fontSize="xl">
             ZKML Credit Score
             </Text> 
             <Button size={buttonSize} variant='outline' colorScheme="blue" onClick={() => generateCreditScore()} isLoading={loadingEZKL}>
             Generate
-            </Button>
-            </Box>
-        }
-        {creditScore && 
-            <Box>
-            <Text fontSize="xl">
-                Get Loan
-            </Text> 
-            <Button size={buttonSize} variant='outline' colorScheme="blue" onClick={() => getLoan()} isLoading={loadingEZKL}>
-                Send it!
             </Button>
             </Box>
         }
@@ -231,42 +238,32 @@ export default function Main() {
                 <Spinner />
             </Text> 
             </Box>
-        </>
-        :
-        <>
-      <Image
-        src="/confused-john-travolta.gif" // Replace with your image path
-        boxSize='250px'
-        alt="John Travolta confused"
-        />
-      <Text fontSize={breakpoint} fontWeight="bold" color="blue">
-        Where is the collateral?
-      </Text>
-        </>
-    }
+            </>
+            :
+            <>
+                    {creditScore && 
+            <Box>
+            <Text fontSize="xl">
+                Get Loan
+            </Text> 
+            <Button size={buttonSize} variant='outline' colorScheme="blue" onClick={() => getLoan()} isLoading={loadingEZKL}>
+                Send it!
+            </Button>
+            </Box>
+        }
+        <Image
+            src="/confused-john-travolta.gif" // Replace with your image path
+            boxSize='250px'
+            alt="John Travolta confused"
+            />
+        <Text fontSize={breakpoint} fontWeight="bold" color="blue">
+            Where is the collateral?
+        </Text>
+            </>
+        }
 
 
     {/* <Grid templateColumns={{ sm: "repeat(1, 1fr)", md: "repeat(6, 1fr)" }} gap={2}>
-        <Image
-        src="/girl.png" // Replace with your image path
-        boxSize={useBreakpointValue({ base: "50px", md: "100px", lg: "150px" })}
-        alt="Nounish girl"
-      />
-        <Image
-        src="/monkey.png" // Replace with your image path
-        boxSize={useBreakpointValue({ base: "50px", md: "100px", lg: "150px" })}
-        alt="Nounish girl"
-      />
-        <Image
-        src="/girl.png" // Replace with your image path
-        boxSize={useBreakpointValue({ base: "50px", md: "100px", lg: "150px" })}
-        alt="Nounish girl"
-      />
-        <Image
-        src="/monkey.png" // Replace with your image path
-        boxSize={useBreakpointValue({ base: "50px", md: "100px", lg: "150px" })}
-        alt="Nounish girl"
-      />
         <Image
         src="/girl.png" // Replace with your image path
         boxSize={useBreakpointValue({ base: "50px", md: "100px", lg: "150px" })}
