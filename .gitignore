@@ -1,0 +1,13 @@
+# Circuit related files
+build
+kzg.srs
+model.proof
+network.ezkl
+pk.key
+settings.json
+Verifier.sol
+vk.key
+witness.json
+
+
+node_modules
