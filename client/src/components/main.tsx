@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react'
-import { Button, Image, Text, VStack, useBreakpointValue, Card, Grid, CardBody } from "@chakra-ui/react";
+import { Button, Image, Text, VStack, useBreakpointValue, Card, Grid, CardBody, Box } from "@chakra-ui/react";
 import { decode } from '@/lib/wld'
 import ContractAbi from '@/abi/Contract.abi'
+import hub from '@ezkljs/hub'
 import { ConnectKitButton } from 'connectkit'
 import { IDKitWidget, ISuccessResult } from '@worldcoin/idkit'
 import { useAccount, useContractWrite, usePrepareContractWrite } from 'wagmi'
-import { clientInput } from '../lib/consts'
 
 export default function Main() {
 	const { address } = useAccount()
@@ -70,22 +70,29 @@ export default function Main() {
     }
 
     return (
-		    <VStack
+        <Box>
+
+    <VStack
       spacing={4}
       align="center"
       justify="center"
-      height="100vh"
     >
+      <Text fontSize={useBreakpointValue({ base: "xl", md: "2xl", lg: "3xl" })} fontWeight="bold">
+            zkCreditScore
+      </Text>
       <Image
-        src="/heroimage.png" // Replace with your image path
+        src="/confused-john-travolta.gif" // Replace with your image path
         boxSize={useBreakpointValue({ base: "150px", md: "200px", lg: "250px" })}
         alt="Image Description"
       />
-      <Text fontSize={useBreakpointValue({ base: "xl", md: "2xl", lg: "3xl" })} fontWeight="bold">
-        zkCreditScore
+      <Text fontSize={useBreakpointValue({ base: "xl", md: "2xl", lg: "3xl" })} fontWeight="bold" color="blue">
+        Where is the collateral?
+      </Text>
+      <Text fontSize={useBreakpointValue({ base: "lg", md: "md", lg: "md" })} fontWeight="bold">
+        Minimized collateral lending protocol
       </Text>
 
-      <Grid templateColumns={{ sm: "repeat(1, 1fr)", md: "repeat(2, 1fr)" }} gap={6} p={6}>
+      <Grid templateColumns={{ sm: "repeat(1, 1fr)", md: "repeat(3, 1fr)" }} gap={6} p={6}>
     <Card>
         <CardBody>
             <Text fontSize={useBreakpointValue({ base: "md", md: "lg", lg: "xl" })}>
@@ -95,6 +102,8 @@ export default function Main() {
                 proof ? (
                     <Text color="green">
                         Connected
+                        <br />
+                        {address}
                     </Text>
                     
                 ) : (
@@ -105,17 +114,28 @@ export default function Main() {
                         app_id={process.env.NEXT_PUBLIC_APP_ID!}
                     >
                         {({ open }) => 
-                            <Button size={buttonSize} variant='outline' colorScheme="red" onClick={open}>
+                            <Button size={buttonSize} variant='outline' colorScheme="blue" onClick={open}>
                                 Verify World ID 
                             </Button>
                         }
                     </IDKitWidget>
                 )
             ) : (
-                <Button size={buttonSize} variant='outline' colorScheme="red">
+                <Button size={buttonSize} variant='outline' colorScheme="blue">
                     <ConnectKitButton />
                 </Button>
             )}
+        </CardBody>
+      </Card>
+    <Card>
+        <CardBody>
+            <Text fontSize={useBreakpointValue({ base: "md", md: "lg", lg: "xl" })}>
+                Base KYC
+            </Text> 
+
+            <Text color="gray">
+                (coming soon)
+            </Text>
         </CardBody>
       </Card>
     <Card>
@@ -130,22 +150,74 @@ export default function Main() {
                 {/* Assets: {axiomProof} */}
             </Text>
             :
-            <Button size={buttonSize} variant='outline' colorScheme="red" onClick={() => generateAxiomProof()} isLoading={loadingAxiom}>
+            <Button size={buttonSize} variant='outline' colorScheme="blue" onClick={() => generateAxiomProof()} isLoading={loadingAxiom}>
                 Generate Proof
             </Button>}
         </CardBody>
       </Card>
+   <Card>
+        <CardBody>
+            <Text fontSize={useBreakpointValue({ base: "md", md: "lg", lg: "xl" })}>
+                Off chain credit score
+            </Text> 
+
+            <Text color="gray">
+                (coming soon)
+            </Text>
+        </CardBody>
+      </Card>
+
   </Grid>
 
         {isClient && proof && axiomProof &&
-        <Button size={buttonSize} variant='outline' colorScheme="red" onClick={() => generateAxiomProof()} isLoading={loadingAxiom}>
-            Generate zk Credit Score
-        </Button>
+        <Box>
+            <Text fontSize="xl">
+                Generate zk Credit Score
+            </Text> 
+            <Button size={buttonSize} variant='outline' colorScheme="red" onClick={() => generateAxiomProof()} isLoading={loadingAxiom}>
+                Generate zk Credit Score
+            </Button>
+        </Box>
         }
-  
-  
+
+
+    <Grid templateColumns={{ sm: "repeat(1, 1fr)", md: "repeat(6, 1fr)" }} gap={2}>
+        <Image
+        src="/girl.png" // Replace with your image path
+        boxSize={useBreakpointValue({ base: "50px", md: "100px", lg: "150px" })}
+        alt="Nounish girl"
+      />
+        <Image
+        src="/girl.png" // Replace with your image path
+        boxSize={useBreakpointValue({ base: "50px", md: "100px", lg: "150px" })}
+        alt="Nounish girl"
+      />
+        <Image
+        src="/girl.png" // Replace with your image path
+        boxSize={useBreakpointValue({ base: "50px", md: "100px", lg: "150px" })}
+        alt="Nounish girl"
+      />
+        <Image
+        src="/girl.png" // Replace with your image path
+        boxSize={useBreakpointValue({ base: "50px", md: "100px", lg: "150px" })}
+        alt="Nounish girl"
+      />
+        <Image
+        src="/girl.png" // Replace with your image path
+        boxSize={useBreakpointValue({ base: "50px", md: "100px", lg: "150px" })}
+        alt="Nounish girl"
+      />
+        <Image
+        src="/girl.png" // Replace with your image path
+        boxSize={useBreakpointValue({ base: "50px", md: "100px", lg: "150px" })}
+        alt="Nounish girl"
+      />
+    </Grid>
 
     </VStack>
+    
+    </Box>
+
 
     );
 };
