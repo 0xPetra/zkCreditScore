@@ -1,94 +1,85 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.19;
 
-import { IAxiomV2Client } from "./IAxiomV2Client.sol";
+import "./IAxiomV2Client.sol";
 
-abstract contract AxiomV2Client is IAxiomV2Client {
-    /// @dev address of AxiomV2Query
-    address public immutable axiomV2QueryAddress;
-
-    /// @notice Whether the callback is made from an on-chain or off-chain query
-    /// @param OnChain The callback is made from an on-chain query
-    /// @param OffChain The callback is made from an off-chain query
-    enum AxiomCallbackType {
-        OnChain,
-        OffChain
+abstract contract ZkLending is IAxiomV2Client {
+    struct CreditScoreInfo {
+        uint256 score;
+        uint256 lastUpdated;
+        uint256 accountAge;
+        uint256 averageBalance;
     }
 
-    /// @notice Construct a new AxiomV2Client contract.
-    /// @param  _axiomV2QueryAddress The address of the AxiomV2Query contract.
+    struct LoanInfo {
+        uint256 amount;
+        uint256 interestRate;
+        uint256 dueDate;
+        bool isApproved;
+    }
+
+    uint256 constant private BASE_INTEREST_RATE = 5;
+    uint256 constant private INTEREST_RATE_FACTOR = 2;
+    uint256 constant private LOAN_DURATION = 30 days;
+
+    mapping(address => CreditScoreInfo) public creditScores;
+    mapping(address => LoanInfo) public loans;
+
+    event CreditScoreUpdated(address indexed user, uint256 newScore, uint256 accountAge, uint256 averageBalance);
+    event LoanRequested(address indexed user, uint256 amount);
+    event LoanApproved(address indexed user, uint256 amount);
+    event LoanRejected(address indexed user, uint256 amount);
+    event LoanRepaid(address indexed user, uint256 amount);
+    event LoanDefaulted(address indexed user, uint256 amount);
+
+    address public axiomV2QueryAddress;
+
     constructor(address _axiomV2QueryAddress) {
-        if (_axiomV2QueryAddress == address(0)) {
-            revert AxiomV2QueryAddressIsZero();
-        }
         axiomV2QueryAddress = _axiomV2QueryAddress;
     }
 
-    /// @inheritdoc IAxiomV2Client
     function axiomV2Callback(
         uint64 sourceChainId,
-        address caller,
+        address callerAddr,
         bytes32 querySchema,
         uint256 queryId,
         bytes32[] calldata axiomResults,
-        bytes calldata extraData
-    ) external {
-        if (msg.sender != axiomV2QueryAddress) {
-            revert CallerMustBeAxiomV2Query();
-        }
-        emit AxiomV2Call(sourceChainId, caller, querySchema, queryId);
+        bytes calldata callbackExtraData
+    ) external override {
+        require(msg.sender == axiomV2QueryAddress, "Caller is not AxiomV2Query");
+        require(axiomResults.length >= 2, "Insufficient data returned");
 
-        _validateAxiomV2Call(AxiomCallbackType.OnChain, sourceChainId, caller, querySchema, queryId, extraData);
-        _axiomV2Callback(sourceChainId, caller, querySchema, queryId, axiomResults, extraData);
+        uint256 newAccountAge = uint256(axiomResults[0]);
+        uint256 newAverageBalance = uint256(axiomResults[1]);
+
+        CreditScoreInfo storage scoreInfo = creditScores[callerAddr];
+        scoreInfo.accountAge = newAccountAge;
+        scoreInfo.averageBalance = newAverageBalance;
+
+        scoreInfo.score = calculateCreditScore(newAccountAge, newAverageBalance);
+        scoreInfo.lastUpdated = block.timestamp;
+
+        emit CreditScoreUpdated(callerAddr, scoreInfo.score, newAccountAge, newAverageBalance);
     }
 
-    /// @inheritdoc IAxiomV2Client
-    function axiomV2OffchainCallback(
-        uint64 sourceChainId,
-        address caller,
-        bytes32 querySchema,
-        uint256 queryId,
-        bytes32[] calldata axiomResults,
-        bytes calldata extraData
-    ) external {
-        if (msg.sender != axiomV2QueryAddress) {
-            revert CallerMustBeAxiomV2Query();
-        }
-        emit AxiomV2OffchainCall(sourceChainId, caller, querySchema, queryId);
+    function requestLoan(uint256 amount) public {
+        emit LoanRequested(msg.sender, amount);
+        CreditScoreInfo memory scoreInfo = creditScores[msg.sender];
 
-        _validateAxiomV2Call(AxiomCallbackType.OffChain, sourceChainId, caller, querySchema, queryId, extraData);
-        _axiomV2Callback(sourceChainId, caller, querySchema, queryId, axiomResults, extraData);
+        require(scoreInfo.lastUpdated != 0, "Credit score not available");
+
+        if (scoreInfo.score > 600) {
+            uint256 interestRate = BASE_INTEREST_RATE + (700 - scoreInfo.score) / INTEREST_RATE_FACTOR;
+            loans[msg.sender] = LoanInfo(amount, interestRate, block.timestamp + LOAN_DURATION, true);
+            emit LoanApproved(msg.sender, amount);
+        } else {
+            emit LoanRejected(msg.sender, amount);
+        }
     }
 
-    /// @notice Validate the callback from AxiomV2Query
-    /// @param  callbackType Whether the callback is made from an on-chain or off-chain query
-    /// @param  sourceChainId The ID of the chain the query reads from.
-    /// @param  caller The address of the account that initiated the query.
-    /// @param  querySchema The schema of the query, defined as `keccak(k . resultLen . vkeyLen . vkey)`
-    /// @param  queryId The unique ID identifying the query.
-    /// @param  extraData Additional data passed to the callback.
-    function _validateAxiomV2Call(
-        AxiomCallbackType callbackType,
-        uint64 sourceChainId,
-        address caller,
-        bytes32 querySchema,
-        uint256 queryId,
-        bytes calldata extraData
-    ) internal virtual;
+    function calculateCreditScore(uint256 accountAge, uint256 averageBalance) internal pure returns (uint256) {
+        return (averageBalance / 1 ether) * 2 + (accountAge / 365 days) * 3;
+    }
 
-    /// @notice Perform application logic after receiving callback.
-    /// @param  sourceChainId The ID of the chain the query reads from.
-    /// @param  caller The address of the account that initiated the query.
-    /// @param  querySchema The schema of the query, defined as `keccak(k . resultLen . vkeyLen . vkey)`
-    /// @param  queryId The unique ID identifying the query.
-    /// @param  axiomResults The results of the query.
-    /// @param  extraData Additional data passed to the callback.
-    function _axiomV2Callback(
-        uint64 sourceChainId,
-        address caller,
-        bytes32 querySchema,
-        uint256 queryId,
-        bytes32[] calldata axiomResults,
-        bytes calldata extraData
-    ) internal virtual;
+    // Additional functions and logic as necessary...
 }
