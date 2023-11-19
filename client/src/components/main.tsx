@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react'
-import { Button, Image, Text, VStack, useBreakpointValue, Card, Grid, CardBody, Box, Spinner } from "@chakra-ui/react";
+import { Button, Image, Text, VStack, useBreakpointValue, Card, Grid, CardBody, Box, Spinner, Link } from "@chakra-ui/react";
 import { decode } from '@/lib/wld'
 import ContractAbi from '@/abi/Contract.abi'
 import hub from '@ezkljs/hub'
 import { ConnectKitButton } from 'connectkit'
 import { IDKitWidget, ISuccessResult } from '@worldcoin/idkit'
 import { useAccount, useContractWrite, usePrepareContractWrite } from 'wagmi'
+import { ExternalLinkIcon } from '@chakra-ui/icons'
 
 export default function Main() {
 	const { address } = useAccount()
@@ -18,7 +19,6 @@ export default function Main() {
 	const [isClient, setIsClient] = useState(false);
 	const [proof, setProof] = useState<ISuccessResult | null>(null)
 	const [axiomResponse, setAxiomResponse] = useState<any | null>(null)
-	const [axiomProof, setAxiomProof] = useState<any | null>(null)
 	const [creditScore, setCreditScore] = useState<any | null>(null)
 
 	const buttonSize = useBreakpointValue({ base: "sm", md: "md", lg: "lg" });
@@ -70,18 +70,8 @@ export default function Main() {
             });
 
             const axiomUrl = await response.json()
-            console.log("🚀 ~ file: main.tsx:73 ~ generateAxiomProof ~ axiomUrl:", axiomUrl)
-            console.log("🚀 ~ file: main.tsx:73 ~ generateAxiomProof ~ axiomUrl:", axiomUrl.data.transaction)
             const transaction = axiomUrl.data.transaction;
-
             setAxiomResponse(transaction);
-            const responseAxiom: any = await fetch(transaction, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            });
-            console.log('=====>', responseAxiom)
         } catch (error) {
             console.error(error)
         }
@@ -95,6 +85,7 @@ export default function Main() {
             // you can provide an optional url if you're using a custom EZKL Hub instance
             const url: string = 'https://hub.ezkl.xyz'
             const getProofResponse = await hub.getProof({ id, url })
+            console.log("🚀 ~ file: main.tsx:88 ~ generateCreditScore ~ getProofResponse:", getProofResponse)
             console.log(JSON.stringify(getProofResponse), null, 2)
             setCreditScore(8.7)
         } catch (error) {
@@ -108,46 +99,27 @@ export default function Main() {
     }
 
     return (
+        <>
+            <Text fontWeight="bold" margin={2}>
+            {isClient && address && `🐶 ${address.slice(0, 5)}...${address.slice(-5)}`}
+            </Text>
         <Box margin={100}>
-
-    <VStack
-      spacing={4}
-      align="center"
-      justify="center"
-    >
+        <VStack
+            spacing={4}
+            align="center"
+            justify="center"
+        >
+        <Image
+            src="/dog.png" // Replace with your image path
+            boxSize='250px'
+            alt="Image Description"
+        />
       <Text fontSize={useBreakpointValue({ base: "xl", md: "2xl", lg: "3xl" })} fontWeight="bold">
-            zkCreditScore
+        Defi&apos;s Original Goal
       </Text>
       <Text fontSize={useBreakpointValue({ base: "lg", md: "md", lg: "md" })} fontWeight="bold">
         Minimized collateral lending protocol
       </Text>
-
-     {printingMagicMoney ?
-        <>
-            <Box>
-            <Image
-                src="/magicmoney.gif" // Replace with your image path
-                boxSize='250px'
-                alt="Image Description"
-            />
-            <Text fontSize="xl" color="green">
-                Generating loan
-                <Spinner />
-            </Text> 
-            </Box>
-        </>
-        :
-        <>
-      <Image
-        src="/confused-john-travolta.gif" // Replace with your image path
-        boxSize='250px'
-        alt="John Travolta confused"
-        />
-      <Text fontSize={breakpoint} fontWeight="bold" color="blue">
-        Where is the collateral?
-      </Text>
-        </>
-}
 
       <Grid templateColumns={{ sm: "repeat(1, 1fr)", md: "repeat(3, 1fr)" }} gap={6} p={6}>
     <Card>
@@ -178,13 +150,29 @@ export default function Main() {
                     </IDKitWidget>
                 )
             ) : (
-                <Button size={buttonSize} variant='outline' colorScheme="blue">
-                    <ConnectKitButton />
-                </Button>
+                <ConnectKitButton />
             )}
         </CardBody>
       </Card>
-    <Card>
+
+      <Card>
+        <CardBody>
+            <Text fontSize={useBreakpointValue({ base: "md", md: "lg", lg: "xl" })}>
+                On chain Assets (Axiom)
+            </Text> 
+
+            {axiomResponse !== null ? 
+            <Link href={axiomResponse} isExternal>
+              Axiom Proof <ExternalLinkIcon mx='2px' />
+            </Link>
+            :
+            <Button size={buttonSize} variant='outline' colorScheme="blue" onClick={() => generateAxiomProof()} isLoading={loadingAxiom}>
+                Generate Proof
+            </Button>}
+        </CardBody>
+      </Card>
+
+      <Card>
         <CardBody>
             <Text fontSize={useBreakpointValue({ base: "md", md: "lg", lg: "xl" })}>
                 Base KYC
@@ -195,46 +183,27 @@ export default function Main() {
             </Text>
         </CardBody>
       </Card>
-    <Card>
-        <CardBody>
-            <Text fontSize={useBreakpointValue({ base: "md", md: "lg", lg: "xl" })}>
-                On chain Assets (Axiom)
-            </Text> 
-
-            {axiomProof !== null ? 
-            <Text color="green">
-                Assets: NaN
-                {/* Assets: {axiomProof} */}
-            </Text>
-            :
-            <Button size={buttonSize} variant='outline' colorScheme="blue" onClick={() => generateAxiomProof()} isLoading={loadingAxiom}>
-                Generate Proof
-            </Button>}
-        </CardBody>
-      </Card>
-   <Card>
+      <Card>
         <CardBody>
             <Text fontSize={useBreakpointValue({ base: "md", md: "lg", lg: "xl" })}>
                 Off chain credit score
-            </Text> 
-
+            </Text>
             <Text color="gray">
                 (coming soon)
             </Text>
         </CardBody>
       </Card>
 
-  </Grid>
-
+    </Grid>
         {true &&
         // {/* FIXME: */}
         // {isClient && proof && axiomProof && !creditScore &&
             <Box>
             <Text fontSize="xl">
-            Generate zk Credit Score
+            ZKML Credit Score
             </Text> 
             <Button size={buttonSize} variant='outline' colorScheme="blue" onClick={() => generateCreditScore()} isLoading={loadingEZKL}>
-            Generate zk Credit Score
+            Generate
             </Button>
             </Box>
         }
@@ -249,10 +218,42 @@ export default function Main() {
             </Box>
         }
 
+        {printingMagicMoney ?
+            <>
+            <Box>
+            <Image
+                src="/magicmoney.gif" // Replace with your image path
+                boxSize='250px'
+                alt="Image Description"
+            />
+            <Text fontSize="xl" color="green">
+                Generating loan
+                <Spinner />
+            </Text> 
+            </Box>
+        </>
+        :
+        <>
+      <Image
+        src="/confused-john-travolta.gif" // Replace with your image path
+        boxSize='250px'
+        alt="John Travolta confused"
+        />
+      <Text fontSize={breakpoint} fontWeight="bold" color="blue">
+        Where is the collateral?
+      </Text>
+        </>
+    }
 
-    <Grid templateColumns={{ sm: "repeat(1, 1fr)", md: "repeat(6, 1fr)" }} gap={2}>
+
+    {/* <Grid templateColumns={{ sm: "repeat(1, 1fr)", md: "repeat(6, 1fr)" }} gap={2}>
         <Image
         src="/girl.png" // Replace with your image path
+        boxSize={useBreakpointValue({ base: "50px", md: "100px", lg: "150px" })}
+        alt="Nounish girl"
+      />
+        <Image
+        src="/monkey.png" // Replace with your image path
         boxSize={useBreakpointValue({ base: "50px", md: "100px", lg: "150px" })}
         alt="Nounish girl"
       />
@@ -262,7 +263,7 @@ export default function Main() {
         alt="Nounish girl"
       />
         <Image
-        src="/girl.png" // Replace with your image path
+        src="/monkey.png" // Replace with your image path
         boxSize={useBreakpointValue({ base: "50px", md: "100px", lg: "150px" })}
         alt="Nounish girl"
       />
@@ -272,20 +273,16 @@ export default function Main() {
         alt="Nounish girl"
       />
         <Image
-        src="/girl.png" // Replace with your image path
+        src="/monkey.png" // Replace with your image path
         boxSize={useBreakpointValue({ base: "50px", md: "100px", lg: "150px" })}
         alt="Nounish girl"
       />
-        <Image
-        src="/girl.png" // Replace with your image path
-        boxSize={useBreakpointValue({ base: "50px", md: "100px", lg: "150px" })}
-        alt="Nounish girl"
-      />
-    </Grid>
+    </Grid> */}
 
     </VStack>
     
     </Box>
+    </>
 
 
     );

@@ -4,12 +4,12 @@ import type { AppProps } from 'next/app'
 import { WagmiConfig, createConfig } from 'wagmi'
 import { alchemyProvider } from 'wagmi/providers/alchemy'
 import { ConnectKitProvider, getDefaultConfig } from 'connectkit'
-import { polygon, optimism, arbitrum, baseGoerli } from "wagmi/chains";
+import { baseGoerli, scrollTestnet, celoAlfajores, mantleTestnet } from "wagmi/chains";
 
 // Choose which chains you'd like to show
 const alchemyId = process.env.NEXT_PUBLIC_ALCHEMY_ID;
 const walletConnectProjectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID ?? "";
-const chains = [polygon, optimism, arbitrum, baseGoerli];
+const chains = [baseGoerli, scrollTestnet, celoAlfajores, mantleTestnet];
 
 const config = createConfig(
   getDefaultConfig({

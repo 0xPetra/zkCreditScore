@@ -4,18 +4,18 @@ import Main from '../components/main'
 export default function Home() {
 
 const config = {
-  initialColorMode: "dark",
+  initialColorMode: "light",
   useSystemColorMode: false, // set to true if you want to use the system color mode
 };
 
 const theme = extendTheme({ config });
 
     return (
-		<ChakraProvider theme={theme} >
-        <main>
-          <Main />
+      <main>
+          <ChakraProvider theme={theme} >
+            <Main />
+          </ChakraProvider>
         </main>
-		</ChakraProvider>
 
     );
 };

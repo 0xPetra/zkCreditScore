@@ -12,6 +12,7 @@
     "@axiom-crypto/core": "^2.2.50",
     "@axiom-crypto/halo2-wasm": "^0.2.7",
     "@axiom-crypto/tools": "^0.3.33",
+    "@chakra-ui/icons": "^2.1.1",
     "@chakra-ui/react": "^2.8.2",
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
